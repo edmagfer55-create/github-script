@@ -1,0 +1,131 @@
+ -- [[ KARD HUB - SCRIPT COMPLETO ]] --
+
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("ImageLabel") -- Fundo com sua foto
+local Content = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+
+-- Configuração da UI (Arrastável)
+ScreenGui.Parent = game.CoreGui
+ScreenGui.Name = "KardHub_Functional"
+
+MainFrame.Name = "Main"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
+MainFrame.Size = UDim2.new(0, 400, 0, 300)
+MainFrame.Image = "rbxassetid://1000074288" -- Substitua pelo ID aprovado da sua foto
+MainFrame.Active = true
+MainFrame.Draggable = true -- Deixa a aba arrastável
+
+Title.Parent = MainFrame
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Text = "KARD HUB"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 0.5
+Title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+
+-- [[ BOTÕES MINIMIZAR / ABRIR ]] --
+local OpenBtn = Instance.new("TextButton")
+OpenBtn.Text = "+"
+OpenBtn.Size = UDim2.new(0, 40, 0, 40)
+OpenBtn.Position = UDim2.new(0, 10, 0.5, -50)
+OpenBtn.Parent = ScreenGui
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Text = "-"
+CloseBtn.Size = UDim2.new(0, 40, 0, 40)
+CloseBtn.Position = UDim2.new(0, 10, 0.5, 0)
+CloseBtn.Parent = ScreenGui
+
+OpenBtn.MouseButton1Click:Connect(function() MainFrame.Visible = true end)
+CloseBtn.MouseButton1Click:Connect(function() MainFrame.Visible = false end)
+
+-- [[ FUNÇÃO: SPEED BRAINROT (30) ]] --
+local SpeedBtn = Instance.new("TextButton")
+SpeedBtn.Parent = MainFrame
+SpeedBtn.Text = "Speed Brainrot: 30"
+SpeedBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
+SpeedBtn.Size = UDim2.new(0, 150, 0, 30)
+
+SpeedBtn.MouseButton1Click:Connect(function()
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 30
+end)
+
+-- [[ FUNÇÃO: PULO INFINITO ]] --
+local InfJumpBtn = Instance.new("TextButton")
+InfJumpBtn.Parent = MainFrame
+InfJumpBtn.Text = "Pulo Infinito: OFF"
+InfJumpBtn.Position = UDim2.new(0.05, 0, 0.35, 0)
+InfJumpBtn.Size = UDim2.new(0, 150, 0, 30)
+
+local jumping = false
+InfJumpBtn.MouseButton1Click:Connect(function()
+    jumping = not jumping
+    InfJumpBtn.Text = jumping and "Pulo Infinito: ON" or "Pulo Infinito: OFF"
+end)
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if jumping then
+        game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+    end
+end)
+
+-- [[ FUNÇÃO: PEGAR ITENS (MESMO OCUPADO) ]] --
+local GrabBtn = Instance.new("TextButton")
+GrabBtn.Parent = MainFrame
+GrabBtn.Text = "Forçar Coleta"
+GrabBtn.Position = UDim2.new(0.05, 0, 0.5, 0)
+GrabBtn.Size = UDim2.new(0, 150, 0, 30)
+
+GrabBtn.MouseButton1Click:Connect(function()
+    for _, tool in pairs(game.Workspace:GetChildren()) do
+        if tool:IsA("BackpackItem") or tool:IsA("Tool") then
+            game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
+        end
+    end
+end)
+
+-- [[ SISTEMA DE TELEPORTE COM BOLINHAS ]] --
+local tpPoints = {nil, nil, nil}
+local balls = {nil, nil, nil}
+
+for i = 1, 3 do
+    -- Botão Salvar
+    local Save = Instance.new("TextButton")
+    Save.Parent = MainFrame
+    Save.Text = "Salvar P" .. i
+    Save.Position = UDim2.new(0.55, 0, 0.2 + (i-1)*0.2, 0)
+    Save.Size = UDim2.new(0, 80, 0, 30)
+
+    -- Botão Teleportar
+    local Go = Instance.new("TextButton")
+    Go.Parent = MainFrame
+    Go.Text = "TP P" .. i
+    Go.Position = UDim2.new(0.78, 0, 0.2 + (i-1)*0.2, 0)
+    Go.Size = UDim2.new(0, 80, 0, 30)
+
+    Save.MouseButton1Click:Connect(function()
+        local pos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+        tpPoints[i] = pos
+        
+        -- Cria a bolinha funcional
+        if balls[i] then balls[i]:Destroy() end
+        local b = Instance.new("Part", game.Workspace)
+        b.Shape = "Ball"
+        b.Size = Vector3.new(2, 2, 2)
+        b.Position = pos
+        b.Anchored = true
+        b.CanCollide = false
+        b.Material = "Neon"
+        b.BrickColor = BrickColor.new("Cyan")
+        b.Transparency = 0.5
+        balls[i] = b
+    end)
+
+    Go.MouseButton1Click:Connect(function()
+        if tpPoints[i] then
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(tpPoints[i] + Vector3.new(0, 3, 0))
+        end
+    end)
+end
